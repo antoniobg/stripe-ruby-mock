@@ -25,7 +25,12 @@ module StripeMock
       end
 
       def list_coupons(route, method_url, params, headers)
-        coupons.values
+        {
+          "object" => "list",
+          "has_more" => false,
+          "url" => "/v1/coupons",
+          "data" => coupons.values
+        } 
       end
 
     end

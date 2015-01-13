@@ -87,7 +87,7 @@ shared_examples 'Coupon API' do
     Stripe::Coupon.create({ id: 'Coupon One', amount_off: 1500 })
     Stripe::Coupon.create({ id: 'Coupon Two', amount_off: 3000 })
 
-    all = Stripe::Coupon.all
+    all = Stripe::Coupon.all["data"]
     expect(all.length).to eq(2)
     expect(all.map &:id).to include('Coupon One', 'Coupon Two')
     expect(all.map &:amount_off).to include(1500, 3000)
