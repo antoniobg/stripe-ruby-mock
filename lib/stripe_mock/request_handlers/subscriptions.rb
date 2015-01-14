@@ -23,6 +23,10 @@ module StripeMock
           customer[:default_card] = new_card[:id]
         end
 
+        if params[:coupon]
+          coupon = assert_existance :coupon, params[:coupon], coupons[params[:coupon]]
+        end
+
         # Ensure customer has card to charge if plan has no trial and is not free
         verify_card_present(customer, plan, params)
 

@@ -12,7 +12,11 @@ module StripeMock
         start_time = options[:current_period_start] || Time.now.utc.to_i
         params = { plan: plan, customer: cus[:id], current_period_start: start_time }
         params.merge! options.select {|k,v| k =~ /application_fee_percent|quantity|metadata/}
-        # TODO: Implement coupon logic
+
+        if options.has_key? :coupon
+          coupon = coupons[options[:coupon]]
+          params.merge!({discount: {coupon: coupon}})
+        end
 
         if (plan[:trial_period_days].nil? && options[:trial_end].nil?) || options[:trial_end] == "now"
           end_time = get_ending_time(start_time, plan)

@@ -156,6 +156,30 @@ shared_examples 'Customer Subscriptions' do
       expect(customer.subscriptions.data.first.customer).to eq(customer.id)
     end
 
+    it "throws an error when coupon does not exist" do
+      plan = stripe_helper.create_plan(id: 'enterprise', amount: 499, trial_period_days: 14)
+      customer = Stripe::Customer.create(id: 'short_trial')
+
+      expect { customer.subscriptions.create({ :plan => 'enterprise', :coupon => 'non_existent_coupon' }) }.to raise_error {|e|
+        expect(e).to be_a Stripe::InvalidRequestError
+        expect(e.http_status).to eq(404)
+        expect(e.message).to_not be_nil
+      }
+
+      expect(customer.subscriptions.data).to be_empty
+      expect(customer.subscriptions.count).to eq(0)
+    end
+
+    it "accepts coupons that do exist" do
+      plan = stripe_helper.create_plan(id: 'enterprise', amount: 499, trial_period_days: 14)
+      customer = Stripe::Customer.create(id: 'short_trial')
+      coupon = Stripe::Coupon.create(id: '15pc_off', percent_off: 15)
+
+      sub = customer.subscriptions.create({ :plan => 'enterprise', :coupon => '15pc_off' })
+      expect(sub.object).to eq('subscription')
+      expect(sub.discount.coupon.to_hash).to eq(coupon.to_hash)
+    end
+
     it "overrides trial length when trial end is set" do
       plan = stripe_helper.create_plan(id: 'trial', amount: 999, trial_period_days: 14)
       customer = Stripe::Customer.create(id: 'short_trial')
